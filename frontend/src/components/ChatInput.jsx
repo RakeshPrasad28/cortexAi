@@ -1,26 +1,61 @@
 import { Mic, Paperclip, Send } from "lucide-react";
 import React, { useState } from "react";
 import { sendMessage } from "../features/sendMessage";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addMessage, setMessages } from "../redux/messageSlice";
+import { createConversation } from "../features/createConversation";
+import {
+  addConversation,
+  setConvTitle,
+  setSelectedConversation,
+} from "../redux/conversationSlice";
+import { updateConversation } from "../features/updateConversation";
 
 const ChatInput = () => {
   const { selectedConversation } = useSelector((state) => state.conversation);
+  const dispatch = useDispatch();
+  const { messages } = useSelector((state) => state.message);
 
   const [value, setValue] = useState("");
   const handleSendMessage = async () => {
+    let conversation = selectedConversation;
+    if (!conversation) {
+      const conv = await createConversation();
+      dispatch(setSelectedConversation(conv));
+      dispatch(addConversation(conv));
+      conversation = conv;
+    }
+
+    if (conversation?.title == "New Chat") {
+      await updateConversation({
+        id: conversation?._id,
+        title: value.trim(),
+      });
+      dispatch(
+        setConvTitle({
+          conversationId: conversation._id,
+          title: value.slice(0, 40),
+        }),
+      );
+    }
+
     const payload = {
       prompt: value.trim(),
-      conversationId: selectedConversation?._id,
+      conversationId: conversation?._id,
     };
+
+    dispatch(addMessage({ role: "user", content: value.trim() }));
+    setValue("");
     const data = await sendMessage(payload);
-    console.log(data,"kkk")
+    dispatch(addMessage({ role: "assistant", content: data }));
+    console.log(data, "kkk");
   };
   return (
     <div className="w-full overflow-hidden px-3 md:px-5 py-4 border-t border-white/[0.06] bg-[#0d0f14]">
       <div className="flex flex-col gap-2 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 pt-3.5 pb-3">
         <textarea
           onChange={(e) => setValue(e.target.value)}
-          value={value.trim()}
+          value={value}
           className="w-full bg-transparent outline-none resize-none text-[14px] text-slate-200 placeholder:text-slate-600 leading-relaxed [scrollbar-width:none] [&::-webkit-scrollbar]:hidden disabled:opacity-50"
           placeholder="Ask anything..."
           rows={3}
