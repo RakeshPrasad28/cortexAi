@@ -7,10 +7,23 @@ import { getModel } from "../config/llmModels.js";
 import { getMemory } from "../config/memory.js";
 
 export const chatAgent = async (state) => {
-  const llm = await getModel("chat");
-  const history = await getMemory(state.conversationId);
+  try {
+    const llm = await getModel("chat");
+    const history = await getMemory(state.conversationId);
 
-  const systemPrompt = `You are RakeshAI, an intelligent AI assistant.
+    const searchContext = state.searchResults
+      ? `Web Search Results: ${JSON.stringify(state.searchResults)} 
+  Answer the user using only the above search results.`
+      : "";
+
+    const systemPrompt = `You are RakeshAI, an intelligent AI assistant.
+  
+    ${searchContext}
+    If searchContext exists:
+    - Use search results to answer.
+    - Do not mention internal tools.
+    
+    
     Rules:
      - For simple questions, greetings and short queries respond naturally in plain text.
      - For technical, educational, coding or detailed topics use clean markdown.
@@ -26,22 +39,28 @@ export const chatAgent = async (state) => {
       - Never generate large walls of text.
   `;
 
-  let messages = [new SystemMessage(systemPrompt)];
+    let messages = [new SystemMessage(systemPrompt)];
 
-  history.forEach((msg) => {
-    if (msg.role == "user") {
-      messages.push(new HumanMessage(msg.content));
-    }
-    if (msg.role == "assistant") {
-      messages.push(new AIMessage(msg.content));
-    }
-  });
+    history.forEach((msg) => {
+      if (msg.role == "user") {
+        messages.push(new HumanMessage(msg.content));
+      }
+      if (msg.role == "assistant") {
+        messages.push(new AIMessage(msg.content));
+      }
+    });
 
-  messages.push(new HumanMessage(state.prompt));
+    messages.push(new HumanMessage(state.prompt));
 
-  const response = await llm.invoke(messages);
-  return {
-    ...state,
-    aiResponse: response.content,
-  };
+    const response = await llm.invoke(messages);
+    return {
+      ...state,
+      aiResponse: response.content,
+    };
+  } catch (error) {
+    return {
+      ...state,
+      aiResponse: "❌ Failed to generate response",
+    };
+  }
 };
