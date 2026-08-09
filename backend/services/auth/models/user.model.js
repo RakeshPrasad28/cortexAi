@@ -1,19 +1,35 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     firebaseUid: {
-        type: String,
-        unique: true,
+      type: String,
+      unique: true,
     },
     name: {
-        type: String,
+      type: String,
     },
     email: {
-        type: String,
+      type: String,
     },
     avatar: { type: String },
-}, { timestamps: true });
+    plan: {
+      type: String,
+      default: "free",
+    },
+    credits: {
+      type: Number,
+      default: 100,
+    },
+    totalCredits: {
+      type: Number,
+      default: 100,
+    },
+    planExpiresAt: Date,
+  },
+  { timestamps: true },
+);
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;
