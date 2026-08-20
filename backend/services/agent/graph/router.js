@@ -1,23 +1,24 @@
 import { getModel } from "../config/llmModels.js";
 
 export const router = async (state) => {
-  if (state.agent && state.agent !== "auto") {
-    return {
-      ...state,
-      agent: state.agent,
-    };
-  }
-
-  if (state.file.mimetype == "application/pdf") {
+  // File-type detection runs FIRST — uploaded files always route by type
+  if (state.file?.mimetype === "application/pdf") {
     return {
       ...state,
       agent: "pdfRag",
     };
   }
-  if (state.file.mimetype.startsWith("image/")) {
+  if (state.file?.mimetype?.startsWith("image/")) {
     return {
       ...state,
       agent: "imageAnalyzer",
+    };
+  }
+
+  if (state.agent && state.agent !== "auto") {
+    return {
+      ...state,
+      agent: state.agent,
     };
   }
 
