@@ -134,8 +134,10 @@ const SideBar = () => {
             >
               <PanelLeftIcon />
             </div>
-            <button onClick={()=>setMobileOpen(false)} 
-            className="lg:hidden flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer">
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer"
+            >
               <X />
             </button>
             <span className="text-[16px] font-semibold text-slate-100 tracking-tight flex-1">
@@ -145,7 +147,7 @@ const SideBar = () => {
               className="text-[10px] font-medium text-indigo-400 bg-indigo-500/10 border
             border-indigo-500/20 px-2 py-0.5 rounded-full tracking-wide"
             >
-              free
+              {userData?.plan || "free"}
             </span>
             <button
               className="flex items-center justify-center h-7 w-7 rounded-lg text-slate-500 hover:text-slate-200
@@ -231,7 +233,7 @@ const SideBar = () => {
                     {userData?.name || user}
                   </p>
                   <p className="text-[11px] text-slate-600 mt-px">
-                    {"Free Plan"}
+                    {`${userData?.plan}` || "free plan"}
                   </p>
                 </div>
                 <div className="flex gap-1">
@@ -259,12 +261,9 @@ const SideBar = () => {
             )}
           </div>
         </div>
-
-        <BillingDrawer
-          open={showBilling}
-          onClose={() => setShowBilling(false)}
-        />
       </div>
+
+      <BillingDrawer open={showBilling} onClose={() => setShowBilling(false)} />
     </>
   );
 };

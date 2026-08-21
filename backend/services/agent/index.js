@@ -7,7 +7,17 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
-app.use("/", router)
+app.use("/", router);
+
+app.use((err, req, res, next) => {
+  console.log(err, "global error0");
+  if (err.status) {
+    return res.status(err.status).json(err.data);
+  }
+  return res.status(500).json({ message: `agent error ${error}` });
+});
+
+
 app.get("/", (req, res) => {
   res.send("Hello from agent!");
 });
